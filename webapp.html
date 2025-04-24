@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tic-Tac-Toe (First to 3 Wins)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      text-align: center;
+      padding: 30px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    .scoreboard {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 5px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background-color: white;
+      font-size: 2.5em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 2px solid #ccc;
+    }
+
+    .cell.taken {
+      cursor: default;
+      color: #333;
+    }
+
+    #message {
+      font-size: 20px;
+      margin-top: 20px;
+    }
+
+    #match-winner {
+      font-size: 24px;
+      color: green;
+      margin-top: 20px;
+    }
+
+    #play-again {
+      display: none;
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    #play-again:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tic-Tac-Toe</h1>
+  <div class="scoreboard">
+    You: <span id="player-score">0</span> &nbsp; | &nbsp;
+    Computer: <span id="computer-score">0</span>
+  </div>
+
+  <div id="board"></div>
+  <div id="message"></div>
+  <div id="match-winner"></div>
+  <button id="play-again" onclick="resetMatch()">Play Again</button>
+
+  <script>
+    let board = ['', '', '', '', '', '', '', '', ''];
+    let gameOver = false;
+    let playerWins = 0;
+    let computerWins = 0;
+
+    const boardEl = document.getElementById('board');
+    const messageEl = document.getElementById('message');
+    const matchWinnerEl = document.getElementById('match-winner');
+    const playAgainBtn = document.getElementById('play-again');
+    const playerScoreEl = document.getElementById('player-score');
+    const computerScoreEl = document.getElementById('computer-score');
+
+    function renderBoard() {
+      boardEl.innerHTML = '';
+      board.forEach((cell, idx) => {
+        const cellEl = document.createElement('div');
+        cellEl.classList.add('cell');
+        if (cell !== '') cellEl.classList.add('taken');
+        cellEl.textContent = cell;
+        cellEl.addEventListener('click', () => handlePlayerMove(idx));
+        boardEl.appendChild(cellEl);
+      });
+    }
+
+    function handlePlayerMove(index) {
+      if (gameOver || board[index] !== '') return;
+      board[index] = 'X';
+      renderBoard();
+      checkGameStatus();
+      if (!gameOver) {
+        setTimeout(computerMove, 400);
+      }
+    }
+
+    function computerMove() {
+      const emptyIndices = board
+        .map((val, idx) => (val === '' ? idx : null))
+        .filter(val => val !== null);
+
+      if (emptyIndices.length === 0) return;
+
+      const move = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+      board[move] = 'O';
+      renderBoard();
+      checkGameStatus();
+    }
+
+    function checkGameStatus() {
+      const wins = [
+        [0,1,2], [3,4,5], [6,7,8],
+        [0,3,6], [1,4,7], [2,5,8],
+        [0,4,8], [2,4,6]
+      ];
+
+      for (let [a, b, c] of wins) {
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+          gameOver = true;
+          if (board[a] === 'X') {
+            playerWins++;
+            messageEl.textContent = 'You win this round! 🎉';
+          } else {
+            computerWins++;
+            messageEl.textContent = 'Computer wins this round! 🤖';
+          }
+          updateScores();
+          checkMatchWinner();
+          return;
+        }
+      }
+
+      if (!board.includes('')) {
+        gameOver = true;
+        messageEl.textContent = "It's a draw!";
+        checkMatchWinner();
+      }
+    }
+
+    function updateScores() {
+      playerScoreEl.textContent = playerWins;
+      computerScoreEl.textContent = computerWins;
+    }
+
+    function checkMatchWinner() {
+      if (playerWins === 3 || computerWins === 3) {
+        matchWinnerEl.textContent = playerWins === 3 ? "🎉 You win the match!" : "🤖 Computer wins the match!";
+        playAgainBtn.style.display = 'inline-block';
+      } else {
+        setTimeout(resetBoard, 1500);
+      }
+    }
+
+    function resetBoard() {
+      board = ['', '', '', '', '', '', '', '', ''];
+      gameOver = false;
+      messageEl.textContent = '';
+      renderBoard();
+    }
+
+    function resetMatch() {
+      board = ['', '', '', '', '', '', '', '', ''];
+      gameOver = false;
+      playerWins = 0;
+      computerWins = 0;
+      messageEl.textContent = '';
+      matchWinnerEl.textContent = '';
+      playAgainBtn.style.display = 'none';
+      updateScores();
+      renderBoard();
+    }
+
+    // Start game
+    renderBoard();
+  </script>
+</body>
+</html>
